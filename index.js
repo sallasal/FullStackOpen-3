@@ -3,6 +3,26 @@ const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const app = express()
+const mongoose = require('mongoose')
+
+const url = `mongodb+srv://puhelinluettelo:passuTahan@puhelinluettelo.zzewe.mongodb.net/puhelinluettelo?retryWrites=true&w=majority`
+
+mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
+
+const personSchema = new mongoose.Schema({
+    name: String,
+    number: String
+})
+
+const Person = mongoose.model("Person", personSchema)
+
+personSchema.set('toJSON', {
+    transform: (document, returnedObject) => {
+        returnedObject.id = returnedObject._id.toString()
+        delete returnedObject._id
+        delete returnedObject.__v
+    }
+})
 
 app.use(cors())
 app.use(express.static('build'))
@@ -42,7 +62,7 @@ app.get('/', (req, res) => {
 })
   
 app.get('/api/persons', (req, res) => {
-    res.json(connections)
+    Person.find({}).then(persons => res.json(persons))
 })
 
 app.get('/api/info', (req, res) => {
