@@ -25,10 +25,17 @@ app.get('/api/persons', (req, res) => {
     Person.find({}).then(persons => res.json(persons))
 })
 
-app.get('/api/info', (req, res) => {
+app.get('/api/info', (req, res, next) => {
     const timestamp = new Date()
-    const peopleAmount = connections.length
-    res.send(`<p>Phonebook has info for ${peopleAmount} people.</p> <p> ${timestamp} </p>`)
+    let allCount = 0
+    Person.countDocuments((err, count) => {
+        console.log("Here logging:", count)
+        allCount = count
+        console.log("Here logging again, count: ", count)
+        console.log("Here still, allCount: ", allCount)
+        res.send(`<p>Phonebook has info for ${allCount} people.</p> <p> ${timestamp} </p>`)
+    })
+    .catch(err => next(err))
 })
 
 app.get('/api/persons/:id', (req, res, next) => {
@@ -71,12 +78,6 @@ app.post('/api/persons', (req, res) => {
     if (!body.name || !body.number) {
         return res.status(400).json({
             error: 'name or number is missing'
-        })
-    }
-
-    if (connections.some(c => c.name === body.name)) {
-        return res.status(400).json({
-            error: 'name must be unique'
         })
     }
     
