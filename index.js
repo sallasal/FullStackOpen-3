@@ -32,17 +32,17 @@ app.get('/api/info', (req, res) => {
 })
 
 app.get('/api/persons/:id', (req, res) => {
-    Person.findById(req.params.id).then(note => {
-        res.json(note)
+    Person.findById(req.params.id).then(result => {
+        res.json(result)
     })
     
 })
 
 app.delete('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    connections = connections.filter(connection => connection.id !== id)
-
-    res.status(204).end()
+    Person.findByIdAndDelete(req.params.id).then(result => {
+        res.status(204).end()
+    })
+    .catch(error => console.log(error.message))
 })
 
 app.post('/api/persons', (req, res) => {
