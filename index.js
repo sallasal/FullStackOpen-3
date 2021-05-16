@@ -31,10 +31,15 @@ app.get('/api/info', (req, res) => {
     res.send(`<p>Phonebook has info for ${peopleAmount} people.</p> <p> ${timestamp} </p>`)
 })
 
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => {
     Person.findById(req.params.id).then(result => {
-        res.json(result)
+        if (result) {
+            res.json(result)
+        } else {
+            res.status(404).end()
+        }
     })
+    .catch(error => next(error))
     
 })
 
@@ -69,6 +74,16 @@ app.post('/api/persons', (req, res) => {
         res.json(savedPerson)
     })
 })
+
+const errorHandler = (error, req, res, next) => {
+    console.error(error.message)
+    if (error.name === "CastError") {
+        return res.status(400).send({ error: "Malformatted id" })
+    }
+    next(error)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
